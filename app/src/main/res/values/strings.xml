@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Credit Score</string>
+    <string name="your_credit_score_is">Your credit score is</string>
+    <string name="out_of_text">out of %d</string>
+</resources>
