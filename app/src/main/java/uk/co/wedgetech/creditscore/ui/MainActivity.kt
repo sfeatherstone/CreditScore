@@ -10,6 +10,10 @@ import uk.co.wedgetech.creditscore.ui.widgets.CircleAngleAnimation
 import kotlinx.android.synthetic.main.activity_main.*
 import uk.co.wedgetech.creditscore.R
 import uk.co.wedgetech.creditscore.domain.network.CreditReportInfo
+import uk.co.wedgetech.creditscore.domain.network.NetworkError
+import android.widget.Toast
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,6 +32,17 @@ class MainActivity : AppCompatActivity() {
         }
         model.creditReport.observe(this, creditReportObserver)
 
+        val errorObserver = object: Observer<NetworkError> {
+            override fun onChanged(t: NetworkError?) {
+                if (t!=null) {
+                    Toast.makeText(this@MainActivity, getString(R.string.network_error_str) ,
+                            Toast.LENGTH_LONG).show()
+                }
+            }
+
+        }
+        model.error.observe(this, errorObserver)
+
         //Fetch new score
         model.updateCreditScore()
     }
@@ -36,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         inner_layout.visibility = VISIBLE
         val animation = CircleAngleAnimation(score_circle, (360 * (creditReportInfo.score-creditReportInfo.minScoreValue)
                 / (creditReportInfo.maxScoreValue-creditReportInfo.minScoreValue)))
-        animation.setDuration(1000)
+        animation.duration = 1000
         score_circle.startAnimation(animation)
         out_of_text.text = getString(R.string.out_of_text).format(creditReportInfo.maxScoreValue)
         score_text.text = creditReportInfo.score.toString()

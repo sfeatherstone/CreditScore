@@ -17,6 +17,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "BASE_REST_URL", "\"https://5lfoiyb0b3.execute-api.us-west-2.amazonaws.com/prod/mockcredit/\""
     }
     buildTypes {
         release {
@@ -26,6 +28,32 @@ android {
     }
 }
 
+
+def props = new Properties()
+def propFile = new File('signing.properties')
+if (propFile.canRead()) {
+    props.load(new FileInputStream(propFile))
+
+    if (props != null &&
+            props.containsKey('STORE_FILE') &&
+            props.containsKey('STORE_PASSWORD') &&
+            props.containsKey('KEY_ALIAS') &&
+            props.containsKey('KEY_PASSWORD')) {
+        android.signingConfigs.release.storeFile = file(props['STORE_FILE'])
+        android.signingConfigs.release.storePassword = props['STORE_PASSWORD']
+        android.signingConfigs.release.keyAlias = props['KEY_ALIAS']
+        android.signingConfigs.release.keyPassword = props['KEY_PASSWORD']
+        println 'Signing information complete. Using keyfile:' + android.signingConfigs.release.storeFile.absolutePath
+    } else {
+        println 'signing.properties found but some entries are missing'
+        android.buildTypes.release.signingConfig = null
+    }
+} else {
+    println 'signing.properties not found at ' + new File(".").absolutePath
+    android.buildTypes.release.signingConfig = null
+}
+
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
@@ -33,9 +61,6 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
     implementation "android.arch.lifecycle:extensions:1.1.0"
-    implementation "android.arch.lifecycle:common-java8:1.1.0"
-    // ReactiveStreams support for LiveData
-    implementation "android.arch.lifecycle:reactivestreams:1.1.0"
 
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
@@ -44,15 +69,9 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.1.7"
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
-    // Dagger Android
-    implementation 'com.google.dagger:dagger:2.13'
-    implementation 'com.google.dagger:dagger-android:2.13'
-    implementation 'com.google.dagger:dagger-android-support:2.13'
-    annotationProcessor 'com.google.dagger:dagger-android-processor:2.13'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
-
-
     testImplementation 'junit:junit:4.12'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.9.0'
+
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
