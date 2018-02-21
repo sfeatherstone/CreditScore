@@ -23,23 +23,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val model : CreditScoreViewModel = ViewModelProviders.of(this).get(CreditScoreViewModel::class.java)
-        val creditReportObserver = object: Observer<CreditReportInfo> {
-            override fun onChanged(creditReportInfo: CreditReportInfo?) {
-                if (creditReportInfo!=null) {
-                    updateScreen(creditReportInfo)
-                }
+        val creditReportObserver = Observer<CreditReportInfo> { creditReportInfo ->
+            if (creditReportInfo!=null) {
+                updateScreen(creditReportInfo)
             }
         }
         model.creditReport.observe(this, creditReportObserver)
 
-        val errorObserver = object: Observer<NetworkError> {
-            override fun onChanged(t: NetworkError?) {
-                if (t!=null) {
-                    Toast.makeText(this@MainActivity, getString(R.string.network_error_str) ,
-                            Toast.LENGTH_LONG).show()
-                }
+        val errorObserver = Observer<NetworkError> { t ->
+            if (t!=null) {
+                Toast.makeText(this@MainActivity, getString(R.string.network_error_str) ,
+                        Toast.LENGTH_LONG).show()
             }
-
         }
         model.error.observe(this, errorObserver)
 
